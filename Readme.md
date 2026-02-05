@@ -93,21 +93,36 @@ SQL View рассчитывает за последние 24 часа:
 ```bash
 cp .env.example .env
 
+POSTGRES_DB=demo_db
+POSTGRES_USER=demo_db
+POSTGRES_PASSWORD=demo_password
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+
+COINGECKO_URL=https://api.coingecko.com/api/v3/coins/markets
+VS_CURRENCY=usd
+TOP_N=10
+REQUEST_TIMEOUT=20
+
+
 Запуск проекта
+
 docker compose up --build
 
 
 При запуске:
 
-Поднимается PostgreSQL
+1.Поднимается PostgreSQL
 
-Создаются таблицы, индексы и view
+2.Создаются таблицы, индексы и view
 
-Запускается ETL
+3.Запускается ETL
 
-Загружаются топ-10 криптовалют
+4.Загружаются топ-10 криптовалют
+
 etl/
     app/
+    ├── __init__.py
     ├── extract.py
     ├── transform.py
     ├── load.py
@@ -121,6 +136,39 @@ docker-compose.yml
 .env.example
 
 db/
- ├── 001_schemas.sql
- ├── 002_indexes.sql
- └── 003_views.sql
+  init/
+    ├── 001_schemas.sql
+    ├── 002_indexes.sql
+    └── 003_views.sql
+
+
+✅ Реализовано
+Extract
+
+ CoinGecko /coins/markets
+
+ retry с exponential backoff
+
+ логирование запросов
+
+ обработка временных ошибок API
+
+Transform
+
+ приведение типов
+
+ фильтрация некорректных данных (price <= 0)
+
+ дедупликация (snapshot_ts, coin_id)
+
+ нормализация символов
+
+Load
+
+ staging + fact слой
+
+ INSERT ... ON CONFLICT
+
+ идемпотентная загрузка
+
+ безопасные повторные запуски
